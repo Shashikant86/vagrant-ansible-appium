@@ -1,0 +1,102 @@
+---
+- hosts: all
+  sudo: true
+  tasks:
+   - name: update apt cache
+     apt: update_cache=yes
+
+   - name: install required packages for HIVE
+     apt: name={{ item }} state=present
+     with_items:
+        - python-software-properties
+        - nodejs
+        - node
+        - curl
+        - wget
+        - make
+        - g++
+        - gcc
+        - git
+        - unzip
+        - openjdk-6-jre
+        - patch
+        - bzip2
+        - build-essential
+        - openssl
+        - libcurl4-openssl-dev
+        - libsasl2-2
+        - libsasl2-dev
+        - libcurl3
+        - libreadline6
+        - libreadline6-dev
+        - git-core
+        - zlib1g
+        - zlib1g-dev
+        - libssl-dev
+        - libyaml-dev
+        - libsqlite3-dev
+        - sqlite3
+        - libxml2-dev
+        - libxslt1-dev
+        - libxslt-dev
+        - autoconf
+        - libc6-dev
+        - libgdbm-dev
+        - ncurses-dev
+        - automake
+        - libtool
+        - bison
+        - subversion
+        - pkg-config
+        - libffi-dev
+        - libcurl3-dev
+        - imagemagick
+        - libmagickwand-dev
+        - libpcre3-dev
+   - name: update apt cache
+     apt: update_cache=yes
+
+   - name: Install key
+     shell: gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+
+   - name: Install RVM
+     shell: curl -L get.rvm.io | bash -s stable
+
+   - name: install ant
+     action: apt name=ant state=latest
+
+   - name: download android sdk
+     action: get_url url=http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz dest=/tmp/android.tgz
+
+   - name: make opt dir for user
+     action: file path=/opt/adt/ state=directory mode=0777
+
+   - name: source bashrc
+     file: path=/home/vagrant/.bashrc state=touch mode="u=rw,g=r,o=r"
+
+   - name: unpacking android
+     action: unarchive copy=no src=/tmp/android.tgz dest=/opt/adt/ creates=/opt/adt//android-sdk-linux
+
+   - name: chown'ing files
+     action: file path=/opt/adt/android-sdk-linux recurse=yes state=directory
+
+   - name: installing android platform-tools
+     action: shell creates=/opt/adt/android-sdk-linux/platform-tools echo y | /opt/adt/android-sdk-linux/tools/android update sdk --no-ui --filter platform-tools
+
+   - name: add ANDROID_HOME
+     action: lineinfile dest=/home/vagrant/.bashrc line="{{ item }}"
+     with_items:
+        - 'export ANDROID_HOME=/opt/adt/android-sdk-linux'
+        - 'export ANDROID_TOOLS=$ANDROID_HOME/tools/'
+        - 'export ANDROID_PLATFORM_TOOLS=$ANDROID_HOME/platform-tools/'
+        - 'export PATH=$PATH:$ANDROID_TOOLS:$ANDROID_PLATFORM_TOOLS'
+
+
+   - name: install Appium
+     shell: npm install appium
+
+   - name: Copy android rules file
+     copy: src=android.rules dest=/etc/udev/rules.d/51-android.rules owner=root mode="0644"
+
+   - name: restart udev
+     service: name=udev state=restarted
