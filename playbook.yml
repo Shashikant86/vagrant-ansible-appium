@@ -6,7 +6,7 @@
    - name: update apt cache
      apt: update_cache=yes
 
-   - name: install required packages for HIVE
+   - name: install required packages require for appium android
      apt: name={{ item }} state=present
      with_items:
         - python-software-properties
@@ -104,10 +104,10 @@
 
    - user: name=appium group=admin
 
-   - name: npm global install
-     npm: global=yes name={{item}}
-     with_items:
-        - appium
+  #  - name: npm global install
+  #    npm: global=yes name={{item}}
+  #    with_items:
+  #       - appium
 
   #  - user: name=appium group=admin
    #

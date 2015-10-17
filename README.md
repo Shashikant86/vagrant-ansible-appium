@@ -1,6 +1,6 @@
 # Appium development ENV Installtion with Vagrant and Ansible
 
-Vagrant-ansible-hive will install BBC Hive CI to vagrant boxes provisioned with ansible and shell.
+Vagrant-ansible-hive will install Appium with android in the vagrant boxes provisioned with ansible and shell.
 
 ## Requirement
 
