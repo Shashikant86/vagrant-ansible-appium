@@ -2,6 +2,7 @@
 - hosts: all
   sudo: true
   tasks:
+   - user: name=vagrant group=admin
    - name: update apt cache
      apt: update_cache=yes
 
@@ -11,6 +12,7 @@
         - python-software-properties
         - nodejs
         - node
+        - npm
         - curl
         - wget
         - make
@@ -56,11 +58,14 @@
    - name: update apt cache
      apt: update_cache=yes
 
-   - name: Install key
-     shell: gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+   - name: Install Ruby Gems
+     gem: name={{item}} state=latest
+     with_items:
+       - bundler
+       - rake
 
-   - name: Install RVM
-     shell: curl -L get.rvm.io | bash -s stable
+   - gem: name=rake state=latest
+   - gem: name=bundler state=latest
 
    - name: install ant
      action: apt name=ant state=latest
@@ -91,12 +96,21 @@
         - 'export ANDROID_PLATFORM_TOOLS=$ANDROID_HOME/platform-tools/'
         - 'export PATH=$PATH:$ANDROID_TOOLS:$ANDROID_PLATFORM_TOOLS'
 
-
-   - name: install Appium
-     shell: npm install appium
-
    - name: Copy android rules file
      copy: src=android.rules dest=/etc/udev/rules.d/51-android.rules owner=root mode="0644"
 
    - name: restart udev
      service: name=udev state=restarted
+
+   - user: name=appium group=admin
+
+   - name: npm global install
+     npm: global=yes name={{item}}
+     with_items:
+        - appium
+
+  #  - user: name=appium group=admin
+   #
+  #  - name: Install appium
+  #    npm: name=appium global=yes
+  #    sudo_user: appium
